@@ -3,13 +3,11 @@ const db = require('../database/index.js')
 const app = express();
 const port = 3000;
 
-app.listen(port, () => {
-  console.log(`Listening at http://localhost:${port}`)
-})
-
-const something = async () => {
+app.get('/qa/questions', async (req, res) => {
+  // can accept product_id, page, count
   let x = await db.query('SELECT * FROM questions LIMIT 10');
-  debugger;
-}
+  // debugger;
+  res.send(x)
+});
 
-something();
+app.listen(port, () => {console.log(`Listening at http://localhost:${port}`)})

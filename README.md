@@ -1,3 +1,5 @@
 # Q&A
 
-rename password.copy.js to password.js and insert the password to postgres
+npm install
+run (yet unfinished) script to create database/tables and seed data
+rename password.example.js to password.js and insert the password to postgres

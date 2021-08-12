@@ -1,8 +1,6 @@
 # MY PROCESS
 This is how I'm loading data into Postgres (the files were in my downloads folder but I can change the paths)
 
-
-
 ## Questions
 \COPY questions(id, product_id, body, date_written, asker_name, asker_email, reported, helpful)
 FROM '/Users/bear/Downloads/questions.csv'
