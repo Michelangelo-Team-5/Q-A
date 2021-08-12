@@ -50,3 +50,8 @@ CREATE TABLE IF NOT EXISTS answers_photos (
 FROM '/Users/bear/Downloads/answers_photos.csv'
 DELIMITER ','
 CSV HEADER;
+
+## Next Steps
+run express
+connect express paths to database queries
+launch on docker/AWS
