@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS questions (
   date_written BIGINT,
   asker_name VARCHAR (60),
   asker_email VARCHAR (60),
-  reported INTEGER DEFAULT 0,
+  reported BOOLEAN,
   helpful INTEGER DEFAULT 0
 );
 
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS answers (
   date_written BIGINT,
   answerer_name VARCHAR (60),
   answerer_email VARCHAR (60),
-  reported INTEGER DEFAULT 0,
+  reported BOOLEAN,
   helpful INTEGER DEFAULT 0,
   FOREIGN KEY(question_id)
     REFERENCES questions(id)
@@ -33,3 +33,8 @@ CREATE TABLE IF NOT EXISTS answers_photos (
   FOREIGN KEY(answer_id)
     REFERENCES answers(id)
 );
+
+-- run from root directory
+-- sudo -u postgres psql < server/schema.sql
+-- psql -U erinoconnor overview < features.sql idk what this is about
+-- psql -U postgres -W

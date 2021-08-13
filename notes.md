@@ -22,4 +22,3 @@ CSV HEADER;
 ## Next Steps
 run express
 connect express paths to database queries
-launch on docker/AWS
