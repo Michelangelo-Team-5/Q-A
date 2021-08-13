@@ -17,15 +17,18 @@ app.get('/qa/questions', async (req, res) => {
   }
   // count default
   if (!count) {
-    let count = 5
+    let count = 5;
   }
   let results = await db.query(`SELECT id as question_id, body as question_body, date_written as question_date, asker_name, helpful as question_helpfulness, reported FROM questions WHERE product_id = ${product_id}`);
   for (var i = 0; i < results.length; i++) {
-    // results[i]["answers"] = {}
-    // add answers property to each object questions[i]
-    // which means I have to do a query for each?
+    let question_id = results[i].question_id;
+    let answers = await db.query(`SELECT id, body, date_written as date, answerer_name, helpful as helpfulness FROM answers WHERE question_id = ${question_id}`);
+    answers = answers[0];
+    results[i].answers = {}
+    results[i].answers[answers.id] = answers;
+
+    // have to add photos array to answers!!!
   }
-  // debugger;
   let response = {product_id, results};
   res.status(200).send(response);
 });
