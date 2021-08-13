@@ -19,15 +19,22 @@ app.get('/qa/questions', async (req, res) => {
   if (!count) {
     let count = 5;
   }
+  // USE PAGE AND COUNT CONDITIONALLY
+
   let results = await db.query(`SELECT id as question_id, body as question_body, date_written as question_date, asker_name, helpful as question_helpfulness, reported FROM questions WHERE product_id = ${product_id}`);
   for (var i = 0; i < results.length; i++) {
     let question_id = results[i].question_id;
     let answers = await db.query(`SELECT id, body, date_written as date, answerer_name, helpful as helpfulness FROM answers WHERE question_id = ${question_id}`);
+    if (!answers || !answers.length) {
+      results[i].answers = {};
+      continue;
+    }
+    // debugger;
     answers = answers[0];
     results[i].answers = {}
     results[i].answers[answers.id] = answers;
-
-    // have to add photos array to answers!!!
+    let photos = await db.query(`SELECT url FROM answers_photos WHERE answer_id = ${answers.id}`);
+    results[i].answers[answers.id].photos = photos.map(i => i.url);
   }
   let response = {product_id, results};
   res.status(200).send(response);

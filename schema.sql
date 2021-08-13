@@ -37,4 +37,4 @@ CREATE TABLE IF NOT EXISTS answers_photos (
 -- run from root directory
 -- sudo -u postgres psql < server/schema.sql
 -- psql -U erinoconnor overview < features.sql idk what this is about
--- psql -U postgres -W
+-- psql -U postgres; \c questions; DROP TABLE questions, answers, answers_photos;
