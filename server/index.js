@@ -56,15 +56,13 @@ app.get('/qa/questions/:question_id', async (req, res) => {
   }
   let question = req.params.question_id;
   let response = {question, page, count}
-  response['results'] = await db.query(`SELECT id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness FROM answers WHERE question_id=${question}`);
-
-  // ADD PHOTOS PROPERTY
-
-  debugger;
+  let results = await db.query(`SELECT id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness FROM answers WHERE question_id=${question}`);
+  for (var i = 0; i < results.length; i++) {
+    let photos = await db.query(`SELECT id, url FROM answers_photos WHERE answer_id=${results[i].answer_id}`);
+    results[i].photos = photos
+  }
+  response['results'] = results;
   res.status(200).send(response);
-}) ;
+});
 
 app.listen(port, () => {console.log(`Listening at http://localhost:${port}`)})
-
-
-// laundry, black masks
