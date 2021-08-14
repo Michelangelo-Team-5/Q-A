@@ -3,9 +3,11 @@ const db = require('../database/index.js')
 const morgan = require('morgan');
 const app = express();
 const port = 3000;
+var compression = require('compression')
 
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 app.use(express.json());
+app.use(compression());
 
 // HAVE TO STRUCTURE DATE
 
@@ -104,9 +106,7 @@ app.post('/qa/questions/:question_id/answers', async (req, res) => {
 // Mark question as helpful
 app.put('/qa/questions/:question_id/helpful', async (req, res) => {
   let question_id = req.params.question_id;
-  let count = await db.query(`SELECT helpful FROM questions WHERE id = ${question_id}`);
-  count = count[0].helpful + 1;
-  db.none(`UPDATE questions SET helpful = ${count} WHERE id = ${question_id}`)
+  db.none(`UPDATE questions SET helpful = helpful + 1 WHERE id = ${question_id}`)
     .then(() => {
       res.sendStatus(204);
     })
@@ -119,7 +119,7 @@ app.put('/qa/questions/:question_id/helpful', async (req, res) => {
 // Report Question
 app.put('/qa/questions/:question_id/report', (req, res) => {
   let question_id = req.params.question_id;
-  db.none(`UPDATE questions SET reported = ${true} WHERE id = ${question_id}`)
+  db.none(`UPDATE questions SET reported = true WHERE id = ${question_id}`)
     .then(() => {
       res.sendStatus(204);
     })
@@ -132,9 +132,7 @@ app.put('/qa/questions/:question_id/report', (req, res) => {
 // Mark answer as helpful
 app.put('/qa/answers/:answer_id/helpful', async (req, res) => {
   let answer_id = req.params.answer_id;
-  let count = await db.query(`SELECT helpful FROM answers WHERE id = ${answer_id}`);
-  count = count[0].helpful + 1;
-  db.none(`UPDATE answers SET helpful = ${count} WHERE id = ${answer_id}`)
+  db.none(`UPDATE answers SET helpful = helpful + 1 WHERE id = ${answer_id}`)
     .then(() => {
       res.sendStatus(204);
     })
@@ -147,7 +145,7 @@ app.put('/qa/answers/:answer_id/helpful', async (req, res) => {
 // report answer
 app.put('/qa/answers/:answer_id/report', (req, res) => {
   let answer_id = req.params.answer_id;
-  db.none(`UPDATE answers SET reported = ${true} WHERE id = ${answer_id}`)
+  db.none(`UPDATE answers SET reported = true WHERE id = ${answer_id}`)
     .then(() => {
       res.sendStatus(204);
     })
