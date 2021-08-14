@@ -29,7 +29,6 @@ app.get('/qa/questions', async (req, res) => {
       results[i].answers = {};
       continue;
     }
-    // debugger;
     answers = answers[0];
     results[i].answers = {}
     results[i].answers[answers.id] = answers;
@@ -39,6 +38,12 @@ app.get('/qa/questions', async (req, res) => {
   let response = {product_id, results};
   res.status(200).send(response);
 });
+
+app.get('/qa/questions/:question_id', async (req, res) => {
+  let x = req.params.question_id;
+  debugger;
+  res.status(200).send('RESPONSE FROM API');
+}) ;
 
 app.listen(port, () => {console.log(`Listening at http://localhost:${port}`)})
 
