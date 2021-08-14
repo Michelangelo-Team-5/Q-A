@@ -6,6 +6,8 @@ const port = 3000;
 
 app.use(morgan('dev'));
 
+// retrieve a list of questions for a particular product
+// REMOVE REPORTED QUESTIONS
 app.get('/qa/questions', async (req, res) => {
   let {product_id, page, count} = req.query;
   if (!product_id) {
@@ -39,10 +41,15 @@ app.get('/qa/questions', async (req, res) => {
   res.status(200).send(response);
 });
 
+// return answers for a given question
+// REMOVE REPORTED ANSWERS
 app.get('/qa/questions/:question_id', async (req, res) => {
-  let x = req.params.question_id;
-  debugger;
-  res.status(200).send('RESPONSE FROM API');
+  // USE PAGE AND COUNT CONDITIONALLY
+
+  let question_id = req.params.question_id;
+  let response = await db.query(`SELECT * FROM answers WHERE question_id=${question_id}`);
+  // debugger;
+  res.status(200).send(response);
 }) ;
 
 app.listen(port, () => {console.log(`Listening at http://localhost:${port}`)})
