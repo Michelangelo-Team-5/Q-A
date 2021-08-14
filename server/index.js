@@ -73,10 +73,18 @@ app.get('/qa/questions/:question_id', async (req, res) => {
 
 // add a question for the given product
 app.post('/qa/questions', (req, res) => {
-  //body, name, email, product_id
-  // WHERE ARE BODY PARAMS ON A REQUEST?
-  debugger;
-  res.status(200).send('resopnse from api');
+  let {body, name, email, product_id} = req.body;
+  if (!body || !name || !email || !product_id) {
+    res.status(400).send('Error: Question body contains invalid entries')
+  }
+  // db.none(`INSERT INTO questions(product_id, body, asker_name, asker_email) VALUES($1, $2, $3, $4)`, [product_id, body, name, email])
+  //   .then(() => {
+  //     res.status(200).send('Created');
+  //   })
+  //   .catch(err => {
+  //     console.log(error);
+  //     res.send('404');
+  //   })
 });
 
 
