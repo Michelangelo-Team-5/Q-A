@@ -6,6 +6,8 @@ const port = 3000;
 
 app.use(morgan('dev'));
 
+// HAVE TO STRUCTURE DATE
+
 // retrieve a list of questions for a particular product
 // REMOVE REPORTED QUESTIONS
 app.get('/qa/questions', async (req, res) => {
@@ -15,11 +17,11 @@ app.get('/qa/questions', async (req, res) => {
   }
   // page default
   if (!page) {
-    let page = 1;
+    page = 1;
   }
   // count default
   if (!count) {
-    let count = 5;
+    count = 5;
   }
   // USE PAGE AND COUNT CONDITIONALLY
 
@@ -45,10 +47,20 @@ app.get('/qa/questions', async (req, res) => {
 // REMOVE REPORTED ANSWERS
 app.get('/qa/questions/:question_id', async (req, res) => {
   // USE PAGE AND COUNT CONDITIONALLY
+  let {page, count} = req.query;
+  if (!page) {
+    page = 1;
+  }
+  if (!count) {
+    count = 5;
+  }
+  let question = req.params.question_id;
+  let response = {question, page, count}
+  response['results'] = await db.query(`SELECT id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness FROM answers WHERE question_id=${question}`);
 
-  let question_id = req.params.question_id;
-  let response = await db.query(`SELECT * FROM answers WHERE question_id=${question_id}`);
-  // debugger;
+  // ADD PHOTOS PROPERTY
+
+  debugger;
   res.status(200).send(response);
 }) ;
 
