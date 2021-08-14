@@ -85,7 +85,7 @@ app.post('/qa/questions/:question_id/answers', async (req, res) => {
   let answer_id = id[0].max + 1
   db.none(`INSERT INTO answers(id, question_id, body, date_written, answerer_name, answerer_email, reported) VALUES($1, $2, $3, $4, $5, $6, $7)`, [answer_id, question_id, body, Date.now(), name, email, false])
     .then(async () => {
-      for (let photo in photos) {
+      for (let photo of photos) {
         let photo_id = await db.query(`SELECT MAX(id) from answers_photos`);
         db.none(`INSERT INTO answers_photos(id, answer_id, url) VALUES($1, $2, $3)`, [photo_id[0].max + 1, answer_id, photo])
           .then(() => {})
