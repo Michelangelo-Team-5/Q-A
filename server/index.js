@@ -5,6 +5,7 @@ const app = express();
 const port = 3000;
 
 app.use(morgan('dev'));
+app.use(express.json());
 
 // HAVE TO STRUCTURE DATE
 
@@ -46,6 +47,8 @@ app.get('/qa/questions', async (req, res) => {
 // return answers for a given question
 // REMOVE REPORTED ANSWERS
 app.get('/qa/questions/:question_id', async (req, res) => {
+  // ADD A 400 RESPONSE IF NO QUESTION_ID IS GIVEN
+
   // USE PAGE AND COUNT CONDITIONALLY
   let {page, count} = req.query;
   if (!page) {
@@ -63,6 +66,27 @@ app.get('/qa/questions/:question_id', async (req, res) => {
   }
   response['results'] = results;
   res.status(200).send(response);
+});
+
+
+
+
+// add a question for the given product
+app.post('/qa/questions', (req, res) => {
+  //body, name, email, product_id
+  // WHERE ARE BODY PARAMS ON A REQUEST?
+  debugger;
+  res.status(200).send('resopnse from api');
+});
+
+
+
+
+// add an answer for the given question
+app.post('/qa/questions/:question_id/answers', (req, res) => {
+  // question_id (parameter)
+  // body, name, email, photos
+  res.status(200).send('resopnse from api');
 });
 
 app.listen(port, () => {console.log(`Listening at http://localhost:${port}`)})
