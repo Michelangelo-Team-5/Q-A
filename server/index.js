@@ -63,7 +63,6 @@ app.post('/qa/questions', async (req, res) => {
     res.status(400).send('Error: Question body contains invalid entries')
   }
   let id = await db.query(`SELECT MAX(id) from questions`);
-  debugger;
   db.none(`INSERT INTO questions(id, product_id, body, date_written, asker_name, asker_email, reported) VALUES($1, $2, $3, $4, $5, $6, $7)`, [id[0].max + 1, product_id, body, Date.now(), name, email, false])
     .then(() => {
       res.status(201).send('Created');
@@ -101,5 +100,32 @@ app.post('/qa/questions/:question_id/answers', async (req, res) => {
       res.sendStatus(404);
     })
 });
+
+// Mark question as helpful
+app.put('/qa/questions/:question_id/helpful', async (req, res) => {
+  let question_id = req.params.question_id;
+  let count = await db.query(`SELECT helpful FROM questions WHERE id = ${question_id}`);
+  count = count[0].helpful + 1;
+  debugger;
+  db.none(`UPDATE questions SET helpful = ${count} WHERE id = ${question_id}`)
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch(err => {
+      console.log(err);
+      res.sendStatus(404);
+    })
+});
+
+
+// Report Question
+// PUT /qa/questions/:question_id/report
+
+// Mark answer as helpful
+// PUT /qa/answers/:answer_id/helpful
+
+// report answer
+// PUT /qa/answers/:answer_id/report
+
 
 app.listen(port, () => {console.log(`Listening at http://localhost:${port}`)})
