@@ -130,7 +130,6 @@ app.put('/qa/questions/:question_id/report', (req, res) => {
 });
 
 // Mark answer as helpful
-// PUT /qa/answers/:answer_id/helpful
 app.put('/qa/answers/:answer_id/helpful', async (req, res) => {
   let answer_id = req.params.answer_id;
   let count = await db.query(`SELECT helpful FROM answers WHERE id = ${answer_id}`);
@@ -146,7 +145,17 @@ app.put('/qa/answers/:answer_id/helpful', async (req, res) => {
 });
 
 // report answer
-// PUT /qa/answers/:answer_id/report
+app.put('/qa/answers/:answer_id/report', (req, res) => {
+  let answer_id = req.params.answer_id;
+  db.none(`UPDATE answers SET reported = ${true} WHERE id = ${answer_id}`)
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch(err => {
+      console.log(err);
+      res.sendStatus(404);
+    })
+});
 
 
 app.listen(port, () => {console.log(`Listening at http://localhost:${port}`)})
