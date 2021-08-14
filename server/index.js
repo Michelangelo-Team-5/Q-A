@@ -117,9 +117,19 @@ app.put('/qa/questions/:question_id/helpful', async (req, res) => {
     })
 });
 
-
 // Report Question
 // PUT /qa/questions/:question_id/report
+app.put('/qa/questions/:question_id/report', (req, res) => {
+  let question_id = req.params.question_id;
+  db.none(`UPDATE questions SET reported = ${true} WHERE id = ${question_id}`)
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch(err => {
+      console.log(err);
+      res.sendStatus(404);
+    })
+});
 
 // Mark answer as helpful
 // PUT /qa/answers/:answer_id/helpful
