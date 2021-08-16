@@ -9,6 +9,19 @@ var compression = require('compression')
 app.use(express.json());
 app.use(compression());
 
+
+// app.get('/test', async (req, res) => {
+//   let {product_id, page = 1, count = 5} = req.query;
+//   if (!product_id) {
+//     res.status(400).send('Error: invalid product_id provided');
+//   }
+//   let results = await db.query(`SELECT questions.product_id, questions.id AS question_id, questions.body AS question_body, questions.date_written AS question_date, questions.asker_name AS asker_name, questions.helpful AS question_helpfulness, questions.reported AS reported, answers.id AS answer_id, answers.body AS body, answers.date_written AS date, answers.answerer_name AS answerer_name, answers.helpful AS helpfulness, answers_photos.id AS photo_id, answers_photos.url FROM questions LEFT JOIN answers ON answers.question_id = questions.id
+//   LEFT JOIN answers_photos ON answers.id = answers_photos.answer_id
+//   WHERE questions.product_id = ${product_id};`);
+//   // debugger;
+//   res.send(results);
+// });
+
 // HAVE TO STRUCTURE DATE
 
 // retrieve a list of questions for a particular product
@@ -39,11 +52,12 @@ app.get('/qa/questions', async (req, res) => {
   res.status(200).send(response);
 });
 
+
+
+
 // return answers for a given question
 // REMOVE REPORTED ANSWERS
-app.get('/qa/questions/:question_id', async (req, res) => {
-  // ADD A 400 RESPONSE IF NO QUESTION_ID IS GIVEN
-
+app.get('/qa/questions/:question_id/answers', async (req, res) => {
   // USE PAGE AND COUNT CONDITIONALLY
   let {page = 1, count = 5} = req.query;
 
@@ -57,6 +71,18 @@ app.get('/qa/questions/:question_id', async (req, res) => {
   response['results'] = results;
   res.status(200).send(response);
 });
+
+app.get('/test/:question_id', async (req, res) => {
+  let { page = 1, count = 5} = req.query;
+  let response = { question: req.params.question_id, page, count }
+  response.results = await db.query(`SELECT answers.id as answer_id, answers.body, answers.date_written as date, answers.answerer_name, answers.helpful as helpfulness, json_agg(json_build_object('id', answers_photos.id, 'url', answers_photos.url)) AS photos FROM answers LEFT JOIN answers_photos ON answers_photos.answer_id=answers.id WHERE question_id=${req.params.question_id} GROUP BY answers.id`);
+  res.send(response);
+});
+
+
+
+
+
 
 // add a question for the given product
 app.post('/qa/questions', async (req, res) => {
