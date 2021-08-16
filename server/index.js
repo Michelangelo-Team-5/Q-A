@@ -19,16 +19,12 @@ app.get('/test', async (req, res) => {
   if (!product_id) {
     res.status(400).send('Error: invalid product_id provided');
   }
-  let results = await db.query(`SELECT questions.product_id, json_agg(json_build_object('question_id', questions.id, 'question_body', questions.body, 'question_date', questions.date_written, 'asker_name', questions.asker_name, 'question_helpfulness', questions.helpful, 'reported', questions.reported, 'answers',
-   json_build_object('id', answers.id, 'body', answers.body, 'date', answers.date_written, 'answerer_name', answers.answerer_name, 'helpfulness', answers.helpful, 'photos', (SELECT json_agg(url) FROM answers_photos WHERE answers.id = answers_photos.answer_id)))) AS results FROM questions LEFT JOIN answers ON answers.question_id = questions.id
+  let results = await db.query(`SELECT questions.product_id, json_agg(json_build_object('question_id', questions.id, 'question_body', questions.body, 'question_date', questions.date_written, 'asker_name', questions.asker_name, 'question_helpfulness', questions.helpful, 'reported', questions.reported, 'answers', json_build_object(answers.id,
+   json_build_object('id', answers.id, 'body', answers.body, 'date', answers.date_written, 'answerer_name', answers.answerer_name, 'helpfulness', answers.helpful, 'photos', (SELECT json_agg(url) FROM answers_photos WHERE answers.id = answers_photos.answer_id))))) AS results FROM questions LEFT JOIN answers ON answers.question_id = questions.id
   LEFT JOIN answers_photos ON answers.id = answers_photos.answer_id
   WHERE questions.product_id = ${product_id}
   GROUP BY questions.product_id;`);
-  // debugger;
   res.send(results[0]);
-
-  // 'photo_id', answers_photos.id, 'url', answers_photos.url
-  // 'photos', json_agg(answers_photos.url)
 });
 
 // REMOVE REPORTED QUESTIONS
