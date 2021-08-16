@@ -9,31 +9,34 @@ var compression = require('compression')
 app.use(express.json());
 app.use(compression());
 
+// STRUCTURE DATE
 
-// app.get('/test', async (req, res) => {
-//   let {product_id, page = 1, count = 5} = req.query;
-//   if (!product_id) {
-//     res.status(400).send('Error: invalid product_id provided');
-//   }
-//   let results = await db.query(`SELECT questions.product_id, questions.id AS question_id, questions.body AS question_body, questions.date_written AS question_date, questions.asker_name AS asker_name, questions.helpful AS question_helpfulness, questions.reported AS reported, answers.id AS answer_id, answers.body AS body, answers.date_written AS date, answers.answerer_name AS answerer_name, answers.helpful AS helpfulness, answers_photos.id AS photo_id, answers_photos.url FROM questions LEFT JOIN answers ON answers.question_id = questions.id
-//   LEFT JOIN answers_photos ON answers.id = answers_photos.answer_id
-//   WHERE questions.product_id = ${product_id};`);
-//   // debugger;
-//   res.send(results);
-// });
 
-// HAVE TO STRUCTURE DATE
-
-// retrieve a list of questions for a particular product
 // REMOVE REPORTED QUESTIONS
+// USE PAGE AND COUNT CONDITIONALLY
+app.get('/test', async (req, res) => {
+  let {product_id, page = 1, count = 5} = req.query;
+  if (!product_id) {
+    res.status(400).send('Error: invalid product_id provided');
+  }
+  let results = await db.query(`SELECT questions.product_id, json_agg(json_build_object('question_id', questions.id, 'question_body', questions.body, 'question_date', questions.date_written, 'asker_name', questions.asker_name, 'question_helpfulness', questions.helpful, 'reported', questions.reported, 'answers',
+   json_build_object('id', answers.id, 'body', answers.body, 'date', answers.date_written, 'answerer_name', answers.answerer_name, 'helpfulness', answers.helpful, 'photo_id', answers_photos.id, 'url', answers_photos.url))) AS results FROM questions LEFT JOIN answers ON answers.question_id = questions.id
+  LEFT JOIN answers_photos ON answers.id = answers_photos.answer_id
+  WHERE questions.product_id = ${product_id}
+  GROUP BY questions.product_id;`);
+  // debugger;
+  res.send(results[0]);
+
+  // 'photos', json_agg(answers_photos.url)
+});
+
+// REMOVE REPORTED QUESTIONS
+// USE PAGE AND COUNT CONDITIONALLY
 app.get('/qa/questions', async (req, res) => {
   let {product_id, page = 1, count = 5} = req.query;
   if (!product_id) {
     res.status(400).send('Error: invalid product_id provided');
   }
-
-  // USE PAGE AND COUNT CONDITIONALLY
-
   let results = await db.query(`SELECT id as question_id, body as question_body, date_written as question_date, asker_name, helpful as question_helpfulness, reported FROM questions WHERE product_id = ${product_id}`);
   for (var i = 0; i < results.length; i++) {
     let question_id = results[i].question_id;
@@ -52,37 +55,29 @@ app.get('/qa/questions', async (req, res) => {
   res.status(200).send(response);
 });
 
-
-
-
-// return answers for a given question
 // REMOVE REPORTED ANSWERS
-app.get('/qa/questions/:question_id/answers', async (req, res) => {
-  // USE PAGE AND COUNT CONDITIONALLY
-  let {page = 1, count = 5} = req.query;
+// USE PAGE AND COUNT CONDITIONALLY
+// app.get('/qa/questions/:question_id/answers', async (req, res) => {
+//   let {page = 1, count = 5} = req.query;
+//   let question = req.params.question_id;
+//   let response = {question, page, count}
+//   let results = await db.query(`SELECT id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness FROM answers WHERE question_id=${question}`);
+//   for (var i = 0; i < results.length; i++) {
+//     let photos = await db.query(`SELECT id, url FROM answers_photos WHERE answer_id=${results[i].answer_id}`);
+//     results[i].photos = photos
+//   }
+//   response['results'] = results;
+//   res.status(200).send(response);
+// });
 
-  let question = req.params.question_id;
-  let response = {question, page, count}
-  let results = await db.query(`SELECT id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness FROM answers WHERE question_id=${question}`);
-  for (var i = 0; i < results.length; i++) {
-    let photos = await db.query(`SELECT id, url FROM answers_photos WHERE answer_id=${results[i].answer_id}`);
-    results[i].photos = photos
-  }
-  response['results'] = results;
-  res.status(200).send(response);
-});
-
-app.get('/test/:question_id', async (req, res) => {
+// REMOVE REPORTED ANSWERS
+// USE PAGE AND COUNT CONDITIONALLY
+app.get('/qa/questions/:question_id', async (req, res) => {
   let { page = 1, count = 5} = req.query;
   let response = { question: req.params.question_id, page, count }
   response.results = await db.query(`SELECT answers.id as answer_id, answers.body, answers.date_written as date, answers.answerer_name, answers.helpful as helpfulness, json_agg(json_build_object('id', answers_photos.id, 'url', answers_photos.url)) AS photos FROM answers LEFT JOIN answers_photos ON answers_photos.answer_id=answers.id WHERE question_id=${req.params.question_id} GROUP BY answers.id`);
   res.send(response);
 });
-
-
-
-
-
 
 // add a question for the given product
 app.post('/qa/questions', async (req, res) => {
