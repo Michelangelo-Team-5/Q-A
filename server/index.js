@@ -53,7 +53,7 @@ app.get('/qa/questions', async (req, res) => {
 
 // REMOVE REPORTED ANSWERS
 // USE PAGE AND COUNT CONDITIONALLY
-app.get('/qa/questions/:question_id', async (req, res) => {
+app.get('/qa/questions/:question_id/answers', async (req, res) => {
   let { page = 1, count = 5} = req.query;
   let response = { question: req.params.question_id, page, count }
   response.results = await db.query(`SELECT answers.id as answer_id, answers.body, answers.date_written as date, answers.answerer_name, answers.helpful as helpfulness, json_agg(json_build_object('id', answers_photos.id, 'url', answers_photos.url)) AS photos FROM answers LEFT JOIN answers_photos ON answers_photos.answer_id=answers.id WHERE question_id=${req.params.question_id} GROUP BY answers.id`);
