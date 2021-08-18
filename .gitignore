@@ -1,5 +1,2 @@
 node_modules
-password.js
-questions.csv
-answers.csv
-answers_photos.csv
+config.js
