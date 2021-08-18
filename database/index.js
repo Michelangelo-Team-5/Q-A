@@ -1,13 +1,13 @@
 const pgp = require('pg-promise')();
-const password = require('../password.js').password;
+const config = require('../config.js');
 
 // Preparing the connection details:
 const cn = {
-  host: 'localhost',
+  host: `${config.host}`,
   port: 5432,
   database: 'questions',
   user: 'postgres',
-  password: `${password}`
+  password: `${config.password}`
 };
 // Creating a new database instance from the connection details:
 const db = pgp(cn);
