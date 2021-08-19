@@ -10,7 +10,33 @@ app.use(express.json());
 app.use(compression());
 
 // STRUCTURE DATE
+// REMOVE REPORTED QUESTIONS
+// USE PAGE AND COUNT CONDITIONALLY
 
+// app.get('/qa/questions', async (req, res) => {
+//   let {product_id, page = 1, count = 5} = req.query;
+//   if (!product_id) {
+//     res.status(400).send('Error: invalid product_id provided');
+//   }
+//   let [results] = await db.query(
+//     `SELECT questions.product_id,
+//       json_agg(
+//         json_build_object(
+//           'question_id', questions.id, 'question_body', questions.body, 'question_date', questions.date_written, 'asker_name', questions.asker_name, 'question_helpfulness', questions.helpful, 'reported', questions.reported, 'answers',
+//             json_build_object(
+//               answers.id, json_build_object(
+//               'id', answers.id, 'body', answers.body, 'date', answers.date_written, 'answerer_name', answers.answerer_name, 'helpfulness', answers.helpful, 'photos', (
+//                 SELECT json_agg(url) FROM answers_photos
+//                 WHERE answers.id = answers_photos.answer_id
+//                 )
+//             )
+//           )
+//         )
+//       ) AS results FROM questions LEFT JOIN answers ON answers.question_id = questions.id LEFT JOIN answers_photos ON answers.id = answers_photos.answer_id
+//   WHERE questions.product_id = ${product_id}
+//   GROUP BY questions.product_id;`);
+//   res.send(results);
+// });
 
 // REMOVE REPORTED QUESTIONS
 // USE PAGE AND COUNT CONDITIONALLY
@@ -19,40 +45,24 @@ app.get('/qa/questions', async (req, res) => {
   if (!product_id) {
     res.status(400).send('Error: invalid product_id provided');
   }
-  let [results] = await db.query(`SELECT questions.product_id, json_agg(json_build_object('question_id', questions.id, 'question_body', questions.body, 'question_date', questions.date_written, 'asker_name', questions.asker_name, 'question_helpfulness', questions.helpful, 'reported', questions.reported, 'answers', json_build_object(answers.id, json_build_object('id', answers.id, 'body', answers.body, 'date', answers.date_written, 'answerer_name', answers.answerer_name, 'helpfulness', answers.helpful, 'photos', (SELECT json_agg(url) FROM answers_photos
-  WHERE answers.id = answers_photos.answer_id))))) AS results FROM questions LEFT JOIN answers ON answers.question_id = questions.id LEFT JOIN answers_photos ON answers.id = answers_photos.answer_id
-  WHERE questions.product_id = ${product_id}
-  GROUP BY questions.product_id;`);
-  res.send(results);
+  let results = await db.query(`SELECT id as question_id, body as question_body, date_written as question_date, asker_name, helpful as question_helpfulness, reported FROM questions WHERE product_id = ${product_id}`);
+  for (var i = 0; i < results.length; i++) {
+    let question_id = results[i].question_id;
+    let answers = await db.query(`SELECT id, body, date_written as date, answerer_name, helpful as helpfulness FROM answers WHERE question_id = ${question_id}`);
+    if (!answers || !answers.length) {
+      results[i].answers = {};
+      continue;
+    }
+    answers = answers[0];
+    results[i].answers = {}
+    results[i].answers[answers.id] = answers;
+    let photos = await db.query(`SELECT url FROM answers_photos WHERE answer_id = ${answers.id}`);
+    results[i].answers[answers.id].photos = photos.map(i => i.url);
+  }
+  let response = {product_id, results};
+  res.status(200).send(response);
 });
 
-// REMOVE REPORTED QUESTIONS
-// USE PAGE AND COUNT CONDITIONALLY
-// app.get('/qa/questions', async (req, res) => {
-//   let {product_id, page = 1, count = 5} = req.query;
-//   if (!product_id) {
-//     res.status(400).send('Error: invalid product_id provided');
-//   }
-//   let results = await db.query(`SELECT id as question_id, body as question_body, date_written as question_date, asker_name, helpful as question_helpfulness, reported FROM questions WHERE product_id = ${product_id}`);
-//   for (var i = 0; i < results.length; i++) {
-//     let question_id = results[i].question_id;
-//     let answers = await db.query(`SELECT id, body, date_written as date, answerer_name, helpful as helpfulness FROM answers WHERE question_id = ${question_id}`);
-//     if (!answers || !answers.length) {
-//       results[i].answers = {};
-//       continue;
-//     }
-//     answers = answers[0];
-//     results[i].answers = {}
-//     results[i].answers[answers.id] = answers;
-//     let photos = await db.query(`SELECT url FROM answers_photos WHERE answer_id = ${answers.id}`);
-//     results[i].answers[answers.id].photos = photos.map(i => i.url);
-//   }
-//   let response = {product_id, results};
-//   res.status(200).send(response);
-// });
-
-// REMOVE REPORTED ANSWERS
-// USE PAGE AND COUNT CONDITIONALLY
 app.get('/qa/questions/:question_id/answers', async (req, res) => {
   let { page = 1, count = 5} = req.query;
   let response = { question: req.params.question_id, page, count }
@@ -60,8 +70,6 @@ app.get('/qa/questions/:question_id/answers', async (req, res) => {
   res.send(response);
 });
 
-// REMOVE REPORTED ANSWERS
-// USE PAGE AND COUNT CONDITIONALLY
 // app.get('/qa/questions/:question_id/answers', async (req, res) => {
 //   let {page = 1, count = 5} = req.query;
 //   let question = req.params.question_id;
@@ -104,7 +112,7 @@ app.post('/qa/questions/:question_id/answers', async (req, res) => {
     .then(async () => {
       for (let photo of photos) {
         let photo_id = await db.query(`SELECT MAX(id) from answers_photos`);
-        db.none(`INSERT INTO answers_photos(id, answer_id, url) VALUES($1, $2, $3)`, [photo_id[0].max + 1, answer_id, photo])
+        db.none(`INSERT INTO answers_photos(id, answer_id, url) VALUES($1, $2, $3)`, [photo_id[0].max + 1, max + 1, photo])
           .then(() => {})
           .catch(err => {
             console.log(err);
