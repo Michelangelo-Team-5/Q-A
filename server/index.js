@@ -1,3 +1,4 @@
+require('newrelic');
 const express = require('express');
 const db = require('../database/index.js')
 const morgan = require('morgan');
