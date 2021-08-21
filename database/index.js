@@ -3,7 +3,7 @@ const config = require('../config.js');
 
 // Preparing the connection details:
 const cn = {
-  host: 'localhost',
+  host: `${config.host}`,
   port: 5432,
   database: 'questions',
   user: 'postgres',

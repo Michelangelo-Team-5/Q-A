@@ -45,8 +45,11 @@ app.get('/qa/questions', async (req, res) => {
 });
 
 // REMOVE REPORTED QUESTIONS
-// USE PAGE AND COUNT CONDITIONALLY
+// USE PAGE AND COUNT CONDITIONALLYD
 /* app.get('/qa/questions', async (req, res) => {
+=======
+/*app.get('/qa/questions', async (req, res) => {
+>>>>>>> 3878bf1d7be194291889ad3fc789007bd2887531
   let {product_id, page = 1, count = 5} = req.query;
   if (!product_id) {
     res.status(400).send('Error: invalid product_id provided');
