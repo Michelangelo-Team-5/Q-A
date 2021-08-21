@@ -19,34 +19,34 @@ app.get('/loaderio-f30f72b36c0d0c5755fb690fc21911fa', (req, res) => {
 // REMOVE REPORTED QUESTIONS
 // USE PAGE AND COUNT CONDITIONALLY
 
-// app.get('/qa/questions', async (req, res) => {
-//   let {product_id, page = 1, count = 5} = req.query;
-//   if (!product_id) {
-//     res.status(400).send('Error: invalid product_id provided');
-//   }
-//   let [results] = await db.query(
-//     `SELECT questions.product_id,
-//       json_agg(
-//         json_build_object(
-//           'question_id', questions.id, 'question_body', questions.body, 'question_date', questions.date_written, 'asker_name', questions.asker_name, 'question_helpfulness', questions.helpful, 'reported', questions.reported, 'answers',
-//             json_build_object(
-//               answers.id, json_build_object(
-//               'id', answers.id, 'body', answers.body, 'date', answers.date_written, 'answerer_name', answers.answerer_name, 'helpfulness', answers.helpful, 'photos', (
-//                 SELECT json_agg(url) FROM answers_photos
-//                 WHERE answers.id = answers_photos.answer_id
-//                 )
-//             )
-//           )
-//         )
-//       ) AS results FROM questions LEFT JOIN answers ON answers.question_id = questions.id LEFT JOIN answers_photos ON answers.id = answers_photos.answer_id
-//   WHERE questions.product_id = ${product_id}
-//   GROUP BY questions.product_id;`);
-//   res.send(results);
-// });
+app.get('/qa/questions', async (req, res) => {
+  let {product_id, page = 1, count = 5} = req.query;
+  if (!product_id) {
+    res.status(400).send('Error: invalid product_id provided');
+  }
+  let [results] = await db.query(
+    `SELECT questions.product_id,
+      json_agg(
+        json_build_object(
+          'question_id', questions.id, 'question_body', questions.body, 'question_date', questions.date_written, 'asker_name', questions.asker_name, 'question_helpfulness', questions.helpful, 'reported', questions.reported, 'answers',
+            (CASE WHEN answers.id IS NOT NULL THEN json_build_object(
+              answers.id, json_build_object(
+              'id', answers.id, 'body', answers.body, 'date', answers.date_written, 'answerer_name', answers.answerer_name, 'helpfulness', answers.helpful, 'photos', (
+                SELECT json_agg(url) FROM answers_photos
+                WHERE answers.id = answers_photos.answer_id
+                )
+            )
+          ) ELSE '{}' END )
+        )
+      ) AS results FROM questions LEFT JOIN answers ON answers.question_id = questions.id LEFT JOIN answers_photos ON answers.id = answers_photos.answer_id
+  WHERE questions.product_id = ${product_id}
+  GROUP BY questions.product_id;`);
+  res.send(results);
+});
 
 // REMOVE REPORTED QUESTIONS
 // USE PAGE AND COUNT CONDITIONALLY
-app.get('/qa/questions', async (req, res) => {
+/* app.get('/qa/questions', async (req, res) => {
   let {product_id, page = 1, count = 5} = req.query;
   if (!product_id) {
     res.status(400).send('Error: invalid product_id provided');
@@ -68,6 +68,7 @@ app.get('/qa/questions', async (req, res) => {
   let response = {product_id, results};
   res.status(200).send(response);
 });
+*/
 
 app.get('/qa/questions/:question_id/answers', async (req, res) => {
   let { page = 1, count = 5} = req.query;
