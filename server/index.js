@@ -1,4 +1,4 @@
-require('newrelic');
+//require('newrelic');
 const express = require('express');
 const db = require('../database/index.js')
 const morgan = require('morgan');
@@ -9,6 +9,11 @@ var compression = require('compression')
 // app.use(morgan('dev'));
 app.use(express.json());
 app.use(compression());
+
+app.get('/loaderio-f30f72b36c0d0c5755fb690fc21911fa', (req, res) => {
+  res.send('loaderio-f30f72b36c0d0c5755fb690fc21911fa')
+});
+
 
 // STRUCTURE DATE
 // REMOVE REPORTED QUESTIONS
