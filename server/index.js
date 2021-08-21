@@ -29,14 +29,14 @@ app.get('/qa/questions', async (req, res) => {
       json_agg(
         json_build_object(
           'question_id', questions.id, 'question_body', questions.body, 'question_date', questions.date_written, 'asker_name', questions.asker_name, 'question_helpfulness', questions.helpful, 'reported', questions.reported, 'answers',
-            json_build_object(
+            (CASE WHEN answers.id IS NOT NULL THEN json_build_object(
               answers.id, json_build_object(
               'id', answers.id, 'body', answers.body, 'date', answers.date_written, 'answerer_name', answers.answerer_name, 'helpfulness', answers.helpful, 'photos', (
                 SELECT json_agg(url) FROM answers_photos
                 WHERE answers.id = answers_photos.answer_id
                 )
             )
-          )
+          ) ELSE '{}' END )
         )
       ) AS results FROM questions LEFT JOIN answers ON answers.question_id = questions.id LEFT JOIN answers_photos ON answers.id = answers_photos.answer_id
   WHERE questions.product_id = ${product_id}
