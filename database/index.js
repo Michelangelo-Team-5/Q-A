@@ -5,7 +5,7 @@ const config = require('../config.js');
 const cn = {
   host: `${config.host}`,
   port: 5432,
-  database: 'questions',
+  database: 'postgres',
   user: 'postgres',
   password: `${config.password}`
 };
